@@ -10,6 +10,7 @@
 #import "BaseData.h"
 
 #import "AFNetworking.h"
+#import "MJRefresh.h"
 
 #import "FNViewModel.h"
 
@@ -38,6 +39,14 @@
     self.tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 60, self.view.frame.size.width, self.view.frame.size.height - 80) style:UITableViewStylePlain];
     self.tableView.delegate = self;
     self.tableView.dataSource = self;
+    __weak ViewController *weakSelf = self;
+//    self.tableView.mj_header = [MJRefreshHeader headerWithRefreshingBlock:^{
+//        [weakSelf getData];
+//    }];
+    
+    self.tableView.mj_footer = [MJRefreshBackGifFooter footerWithRefreshingBlock:^{
+        [weakSelf getData];
+    }];
 
     [self.view addSubview:self.tableView];
     [self getData];
@@ -57,6 +66,8 @@
     NSString *url = [BaseData baseURL];
     AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
     [manager GET:url parameters:nil headers:nil progress:nil success:^(NSURLSessionDataTask * _Nonnull task, id  _Nullable responseObject) {
+//        [self.tableView.mj_header endRefreshing];
+        [self.tableView.mj_footer endRefreshing];
         NSArray *arr = [responseObject objectForKey:@"statuses"];
         [self.viewModel updateWithStatusesArr:arr complete:^{
             [self.tableView reloadData];
